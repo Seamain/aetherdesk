@@ -118,6 +118,9 @@ const dictionaries = {
     'auto.edit_title': '编辑脚本',
     // API tester
     'api.send': '发送请求',
+    'api.history': '历史记录',
+    'api.clear': '清空',
+    'api.empty': '暂无历史，发送后自动记录',
     'api.url_ph': 'https://api.example.com/v1/...',
   },
   hant: {
@@ -213,6 +216,9 @@ const dictionaries = {
     'auto.new': '新建腳本',
     'auto.edit_title': '編輯腳本',
     'api.send': '傳送請求',
+    'api.history': '歷史記錄',
+    'api.clear': '清空',
+    'api.empty': '暫無歷史，傳送後自動記錄',
     'api.url_ph': 'https://api.example.com/v1/...',
   },
   yue: {
@@ -308,6 +314,9 @@ const dictionaries = {
     'auto.new': '開新腳本',
     'auto.edit_title': '編輯腳本',
     'api.send': '送出請求',
+    'api.history': '歷史記錄',
+    'api.clear': '清空',
+    'api.empty': '未有歷史，送出後自動記低',
     'api.url_ph': 'https://api.example.com/v1/...',
   },
   en: {
@@ -403,6 +412,9 @@ const dictionaries = {
     'auto.new': 'New Script',
     'auto.edit_title': 'Edit Script',
     'api.send': 'Send',
+    'api.history': 'History',
+    'api.clear': 'Clear',
+    'api.empty': 'No history yet — sent requests are recorded',
     'api.url_ph': 'https://api.example.com/v1/...',
   },
 } as const;

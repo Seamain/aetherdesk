@@ -1,15 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Send,
   Clock,
   AlertTriangle,
   Copy,
   Check,
-  Globe
+  Globe,
+  History,
+  Trash2
 } from 'lucide-react';
 import { api } from '../services/api';
 import { sound } from '../services/audio';
 import { useLang } from '../i18n';
+
+interface HistoryEntry {
+  id: number;
+  method: string;
+  url: string;
+  headersText: string;
+  bodyText: string;
+  status: number | null;
+  durationMs: number | null;
+  at: string;
+}
+
+const HISTORY_KEY = 'aether-api-history';
+const HISTORY_MAX = 20;
+
+function loadHistory(): HistoryEntry[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
 
 export const ApiRequesterView: React.FC = () => {
   const { t } = useLang();
@@ -29,6 +53,35 @@ export const ApiRequesterView: React.FC = () => {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>(() => loadHistory());
+
+  useEffect(() => {
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch {}
+  }, [history]);
+
+  const pushHistory = (status: number | null, durationMs: number | null) => {
+    const entry: HistoryEntry = {
+      id: Date.now(),
+      method,
+      url: url.trim(),
+      headersText,
+      bodyText,
+      status,
+      durationMs,
+      at: new Date().toLocaleString(),
+    };
+    setHistory((prev) => [entry, ...prev].slice(0, HISTORY_MAX));
+  };
+
+  const refillFromHistory = (h: HistoryEntry) => {
+    sound.playClick();
+    setMethod(h.method as any);
+    setUrl(h.url);
+    setHeadersText(h.headersText);
+    setBodyText(h.bodyText);
+    setResponse(null);
+    setError(null);
+  };
 
   const handleSend = async () => {
     if (!url.trim()) return;
@@ -61,10 +114,12 @@ export const ApiRequesterView: React.FC = () => {
       });
 
       setResponse(res);
+      pushHistory(res.status ?? null, res.durationMs ?? null);
       sound.playSuccess();
     } catch (err: any) {
       setError(err.message);
       setResponse(null);
+      pushHistory(null, null);
     } finally {
       setLoading(false);
     }
@@ -163,6 +218,54 @@ export const ApiRequesterView: React.FC = () => {
             />
           )}
         </div>
+      </div>
+
+      {/* History Strip */}
+      <div className="glass-panel p-4 rounded-2xl border border-slate-800">
+        <div className="flex items-center justify-between mb-2">
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+            <History className="w-3.5 h-3.5 text-violet-400" />
+            {t('api.history')}
+            <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400">{history.length}</span>
+          </span>
+          {history.length > 0 && (
+            <button
+              onClick={() => { sound.playClick(); setHistory([]); }}
+              className="text-[11px] text-slate-500 hover:text-rose-400 transition-colors"
+            >
+              {t('api.clear')}
+            </button>
+          )}
+        </div>
+        {history.length > 0 ? (
+          <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+            {history.map((h) => (
+              <div
+                key={h.id}
+                onClick={() => refillFromHistory(h)}
+                className="flex items-center gap-2 p-2 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-violet-500/50 cursor-pointer transition-all text-xs"
+              >
+                <span className="font-mono font-bold text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 shrink-0">{h.method}</span>
+                <span className="font-mono text-slate-300 truncate flex-1">{h.url}</span>
+                {h.status !== null && (
+                  <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded shrink-0 ${h.status >= 200 && h.status < 300 ? 'bg-emerald-950 text-emerald-300' : 'bg-rose-950 text-rose-300'}`}>
+                    {h.status}
+                  </span>
+                )}
+                <span className="font-mono text-[10px] text-slate-500 shrink-0 hidden sm:inline">{h.at}</span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setHistory((prev) => prev.filter((x) => x.id !== h.id)); }}
+                  className="p-1 rounded text-slate-600 hover:text-rose-400 shrink-0"
+                  title={t('common.delete')}
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-[11px] text-slate-600 italic">{t('api.empty')}</div>
+        )}
       </div>
 
       {/* Response Panel */}
