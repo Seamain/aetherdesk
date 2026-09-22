@@ -179,6 +179,7 @@ pnpm test   # node:test backend smoke suite: health, telemetry, clamps, SSRF blo
 | `POST` | `/api/runner/run` | Sandbox exec (bash/python/node) 🔒 |
 | `GET` | `/api/webhooks` | Latest 50 captured events |
 | `DELETE` | `/api/webhooks` | Clear inbox 🔒 |
+| `DELETE` | `/api/webhooks/:id` | Delete one event 🔒 |
 | `ALL` | `/api/webhooks/catch/:topic` | Universal webhook receiver |
 | `GET` | `/api/pomodoro/stats` | Recent logs + today's totals |
 | `POST` | `/api/pomodoro/log` | Log a completed session |

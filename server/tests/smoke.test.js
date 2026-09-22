@@ -107,6 +107,24 @@ describe('AetherDesk smoke (open mode, no AETHER_TOKEN)', () => {
     assert.equal(big.status, 400);
   });
 
+  it('webhook single delete removes only that event', async () => {
+    const topic = `del-${Date.now()}`;
+    const put = await fetch(`${BASE}/api/webhooks/catch/${topic}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bye: true }),
+    });
+    const putJson = await put.json();
+    const id = putJson.id;
+    assert.ok(id);
+
+    const del = await fetch(`${BASE}/api/webhooks/${id}`, { method: 'DELETE' });
+    assert.equal(del.status, 200);
+
+    const missing = await fetch(`${BASE}/api/webhooks/${id}`, { method: 'DELETE' });
+    assert.equal(missing.status, 404);
+  });
+
   it('webhook catch stores and lists event', async () => {
     const topic = `smoke-${Date.now()}`;
     const put = await fetch(`${BASE}/api/webhooks/catch/${topic}`, {

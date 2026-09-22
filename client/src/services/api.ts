@@ -105,6 +105,9 @@ export const api = {
   clearWebhooks: () => request<{ message: string }>('/webhooks', {
     method: 'DELETE',
   }),
+  deleteWebhook: (id: number) => request<{ success: boolean }>(`/webhooks/${id}`, {
+    method: 'DELETE',
+  }),
 
   // Pomodoro
   getPomodoroStats: () => request<PomodoroStats>('/pomodoro/stats'),

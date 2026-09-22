@@ -133,6 +133,16 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleDeleteWebhook = async (id: number) => {
+    try {
+      await api.deleteWebhook(id);
+      setWebhooks((prev) => prev.filter((w) => w.id !== id));
+      sound.playClick();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#080c14] text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
       {/* Top Navigation Bar */}
@@ -175,7 +185,7 @@ export const App: React.FC = () => {
           {activeTab === 'notes' && <NotesView />}
 
           {activeTab === 'webhooks' && (
-            <WebhooksView webhooks={webhooks} onClearWebhooks={handleClearWebhooks} />
+            <WebhooksView webhooks={webhooks} onClearWebhooks={handleClearWebhooks} onDeleteWebhook={handleDeleteWebhook} />
           )}
 
           {activeTab === 'automation' && <AutomationView />}

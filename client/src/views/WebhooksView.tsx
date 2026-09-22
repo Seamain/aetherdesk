@@ -5,7 +5,8 @@ import {
   Check,
   Trash2,
   Send,
-  Radio
+  Radio,
+  Search
 } from 'lucide-react';
 import type { WebhookEvent } from '../types';
 import { sound } from '../services/audio';
@@ -14,13 +15,34 @@ import { useLang } from '../i18n';
 interface WebhooksViewProps {
   webhooks: WebhookEvent[];
   onClearWebhooks: () => void;
+  onDeleteWebhook: (id: number) => void;
 }
 
-export const WebhooksView: React.FC<WebhooksViewProps> = ({ webhooks, onClearWebhooks }) => {
+export const WebhooksView: React.FC<WebhooksViewProps> = ({ webhooks, onClearWebhooks, onDeleteWebhook }) => {
   const { t } = useLang();
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [copiedCurl, setCopiedCurl] = useState(false);
   const [selectedHook, setSelectedHook] = useState<WebhookEvent | null>(null);
+  const [search, setSearch] = useState('');
+  const [topicFilter, setTopicFilter] = useState<string | null>(null);
+
+  const topics = Array.from(new Set(webhooks.map((h) => h.endpoint))).sort();
+  const filtered = webhooks.filter((h) => {
+    const q = search.toLowerCase();
+    const matchesSearch =
+      (h.endpoint || '').toLowerCase().includes(q) ||
+      (h.method || '').toLowerCase().includes(q) ||
+      (h.payload || '').toLowerCase().includes(q);
+    const matchesTopic = !topicFilter || h.endpoint === topicFilter;
+    return matchesSearch && matchesTopic;
+  });
+
+  const handleDeleteOne = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    if (!confirm(t('common.confirm_delete'))) return;
+    if (selectedHook?.id === id) setSelectedHook(null);
+    onDeleteWebhook(id);
+  };
 
   const webhookBaseUrl = `${window.location.protocol}//${window.location.hostname}:3001/api/webhooks/catch/alpha`;
   const curlExample = `curl -X POST "${webhookBaseUrl}" \\
@@ -92,9 +114,9 @@ export const WebhooksView: React.FC<WebhooksViewProps> = ({ webhooks, onClearWeb
               <Webhook className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-white">实时 Webhook 捕获箱 (Live Sink)</h3>
+              <h3 className="font-bold text-sm text-white">{t('wh.title')}</h3>
               <p className="text-xs text-slate-400">
-                向本端点发送任何 HTTP 请求，仪表盘将通过 WebSocket 毫秒级呈现数据包。
+                {t('wh.subtitle')}
               </p>
             </div>
           </div>
@@ -152,14 +174,53 @@ export const WebhooksView: React.FC<WebhooksViewProps> = ({ webhooks, onClearWeb
         {/* Left: Stream List */}
         <div className="lg:col-span-1 glass-panel p-4 rounded-2xl border border-slate-800 flex flex-col h-[560px]">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-xs text-slate-400 mb-3">
-            <span className="font-semibold text-slate-200">捕获事件流</span>
+            <span className="font-semibold text-slate-200">{t('wh.stream')}</span>
             <span className="font-mono text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
-              {webhooks.length} 条
+              {filtered.length} / {webhooks.length}
             </span>
           </div>
 
+          {/* Search + topic filter */}
+          <div className="relative mb-2">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('wh.search_ph')}
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-pink-500"
+            />
+          </div>
+          {topics.length > 0 && (
+            <div className="flex items-center gap-1 overflow-x-auto pb-2 mb-1">
+              <button
+                onClick={() => setTopicFilter(null)}
+                className={`shrink-0 px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
+                  topicFilter === null
+                    ? 'bg-pink-600 text-white font-semibold'
+                    : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {t('snippets.all')}
+              </button>
+              {topics.map((topic) => (
+                <button
+                  key={topic}
+                  onClick={() => setTopicFilter(topic === topicFilter ? null : topic)}
+                  className={`shrink-0 px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
+                    topicFilter === topic
+                      ? 'bg-pink-600 text-white font-semibold'
+                      : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  /{topic}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="flex-1 space-y-2 overflow-y-auto pr-1">
-            {webhooks.map((hook) => {
+            {filtered.map((hook) => {
               const isSelected = selectedHook?.id === hook.id;
               return (
                 <div
@@ -178,9 +239,18 @@ export const WebhooksView: React.FC<WebhooksViewProps> = ({ webhooks, onClearWeb
                         /{hook.endpoint}
                       </span>
                     </div>
-                    <span className="text-[10px] font-mono text-slate-500">
-                      {(hook.received_at || '').slice(11, 19) || '--'}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-mono text-slate-500">
+                        {(hook.received_at || '').slice(11, 19) || '--'}
+                      </span>
+                      <button
+                        onClick={(e) => handleDeleteOne(e, hook.id)}
+                        className="p-1 rounded text-slate-600 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                        title={t('wh.delete_one')}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="text-[11px] font-mono text-slate-400 truncate">
@@ -190,10 +260,10 @@ export const WebhooksView: React.FC<WebhooksViewProps> = ({ webhooks, onClearWeb
               );
             })}
 
-            {webhooks.length === 0 && (
+            {filtered.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-500 text-xs space-y-2">
                 <Radio className="w-6 h-6 text-slate-600 animate-pulse" />
-                <span>{t('wh.waiting')}</span>
+                <span>{webhooks.length === 0 ? t('wh.waiting') : t('wh.no_match')}</span>
               </div>
             )}
           </div>

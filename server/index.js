@@ -323,6 +323,12 @@ app.delete('/api/webhooks', requireAuth, (req, res) => {
   res.json({ success: true, message: 'Cleared all webhooks' });
 });
 
+app.delete('/api/webhooks/:id', requireAuth, (req, res) => {
+  const info = db.prepare('DELETE FROM webhooks WHERE id = ?').run(req.params.id);
+  if (info.changes === 0) return res.status(404).json({ success: false, error: 'Webhook not found' });
+  res.json({ success: true });
+});
+
 // Webhook receiver endpoint - handles any method (POST, GET, PUT, etc.)
 app.all('/api/webhooks/catch/:endpoint', limitWebhookCatch, (req, res) => {
   const endpoint = req.params.endpoint;
