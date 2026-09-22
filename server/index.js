@@ -284,8 +284,30 @@ app.post('/api/scripts', requireAuth, (req, res) => {
   res.json({ success: true, data: item });
 });
 
-app.post('/api/scripts/:id/run', requireAuth, async (req, res) => {
-  try {
+app.patch('/api/scripts/:id', requireAuth, (req, res) => {
+  const id = req.params.id;
+  const existing = db.prepare('SELECT * FROM scripts WHERE id = ?').get(id);
+  if (!existing) return res.status(404).json({ success: false, error: 'Script not found' });
+
+  const name = req.body.name ?? existing.name;
+  const command = req.body.command ?? existing.command;
+  const category = req.body.category ?? existing.category;
+  const description = req.body.description ?? existing.description;
+  if (!String(name).trim() || !String(command).trim()) {
+    return res.status(400).json({ success: false, error: 'Name and command must be non-empty' });
+  }
+
+  db.prepare(`
+    UPDATE scripts
+    SET name = ?, command = ?, category = ?, description = ?
+    WHERE id = ?
+  `).run(name, command, category, description, id);
+
+  const updated = db.prepare('SELECT * FROM scripts WHERE id = ?').get(id);
+  res.json({ success: true, data: updated });
+});
+
+app.post('/api/scripts/:id/run', requireAuth, async (req, res) => {  try {
     const result = await executeAutomationScript(req.params.id);
     broadcast('script_executed', result);
     res.json({ success: true, data: result });

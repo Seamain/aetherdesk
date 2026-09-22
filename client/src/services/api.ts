@@ -74,6 +74,10 @@ export const api = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
+  updateScript: (id: number, data: Partial<ScriptItem>) => request<ScriptItem>(`/scripts/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  }),
   runScript: (id: number) => request<{
     success: boolean;
     stdout: string;

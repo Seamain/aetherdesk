@@ -174,6 +174,7 @@ pnpm test   # node:test backend smoke suite: health, telemetry, clamps, SSRF blo
 | `GET`/`POST` | `/api/notes` | List / create notes |
 | `PATCH`/`DELETE` | `/api/notes/:id` | Update / delete a note |
 | `GET`/`POST` | `/api/scripts` | List / create automation scripts (create 🔒) |
+| `PATCH`/`DELETE` | `/api/scripts/:id` | Update / delete a script 🔒 |
 | `POST` | `/api/scripts/:id/run` | Execute a script 🔒 |
 | `DELETE` | `/api/scripts/:id` | Delete a script 🔒 |
 | `POST` | `/api/runner/run` | Sandbox exec (bash/python/node) 🔒 |

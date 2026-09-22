@@ -97,6 +97,7 @@ const dictionaries = {
     // Snippets
     'snippets.search_ph': '搜索片段库、语法或说明...',
     'snippets.new': '新建代码片段',
+    'snippets.edit_title': '编辑代码片段',
     'snippets.all': '全部',
     'snippets.empty': '暂无匹配的代码片段',
     // Webhooks
@@ -113,6 +114,7 @@ const dictionaries = {
     // Automation
     'auto.run': '执行',
     'auto.new': '新建脚本',
+    'auto.edit_title': '编辑脚本',
     // API tester
     'api.send': '发送请求',
     'api.url_ph': 'https://api.example.com/v1/...',
@@ -192,6 +194,7 @@ const dictionaries = {
     'runner.lang': '執行語言',
     'snippets.search_ph': '搜尋片段庫、語法或說明...',
     'snippets.new': '新建程式碼片段',
+    'snippets.edit_title': '編輯程式碼片段',
     'snippets.all': '全部',
     'snippets.empty': '暫無相符的程式碼片段',
     'wh.waiting': '等待請求抵達...',
@@ -206,6 +209,7 @@ const dictionaries = {
     'wh.inspector': '封包深度解析 (Packet Inspector)',
     'auto.run': '執行',
     'auto.new': '新建腳本',
+    'auto.edit_title': '編輯腳本',
     'api.send': '傳送請求',
     'api.url_ph': 'https://api.example.com/v1/...',
   },
@@ -284,6 +288,7 @@ const dictionaries = {
     'runner.lang': '用咩語言跑',
     'snippets.search_ph': '搵片段、語法或者說明...',
     'snippets.new': '開新代碼片段',
+    'snippets.edit_title': '編輯代碼片段',
     'snippets.all': '全部',
     'snippets.empty': '搵唔到相關代碼片段',
     'wh.waiting': '等緊請求嚟...',
@@ -298,6 +303,7 @@ const dictionaries = {
     'wh.inspector': '封包詳細解析 (Packet Inspector)',
     'auto.run': '跑',
     'auto.new': '開新腳本',
+    'auto.edit_title': '編輯腳本',
     'api.send': '送出請求',
     'api.url_ph': 'https://api.example.com/v1/...',
   },
@@ -376,6 +382,7 @@ const dictionaries = {
     'runner.lang': 'Language',
     'snippets.search_ph': 'Search snippets...',
     'snippets.new': 'New Snippet',
+    'snippets.edit_title': 'Edit Snippet',
     'snippets.all': 'All',
     'snippets.empty': 'No matching snippets',
     'wh.waiting': 'Waiting for requests...',
@@ -390,6 +397,7 @@ const dictionaries = {
     'wh.inspector': 'Packet Inspector',
     'auto.run': 'Run',
     'auto.new': 'New Script',
+    'auto.edit_title': 'Edit Script',
     'api.send': 'Send',
     'api.url_ph': 'https://api.example.com/v1/...',
   },

@@ -5,6 +5,7 @@ import {
   Copy,
   Check,
   Star,
+  Pencil,
   Trash2,
   Tag
 } from 'lucide-react';
@@ -22,11 +23,23 @@ export const SnippetsView: React.FC = () => {
 
   // Modal
   const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState<Snippet | null>(null);
   const [title, setTitle] = useState('');
   const [lang, setLang] = useState('bash');
   const [code, setCode] = useState('');
   const [tags, setTags] = useState('');
   const [desc, setDesc] = useState('');
+
+  const openCreate = () => {
+    setEditing(null); setTitle(''); setLang('bash'); setCode(''); setTags(''); setDesc('');
+    sound.playClick(); setShowModal(true);
+  };
+
+  const openEdit = (s: Snippet) => {
+    setEditing(s); setTitle(s.title || ''); setLang(s.language || 'bash');
+    setCode(s.code || ''); setTags(s.tags || ''); setDesc(s.description || '');
+    sound.playClick(); setShowModal(true);
+  };
 
   const fetchSnippets = async () => {
     try {
@@ -69,21 +82,33 @@ export const SnippetsView: React.FC = () => {
     }
   };
 
-  const handleCreateSnippet = async (e: React.FormEvent) => {
+  const handleSaveSnippet = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !code.trim()) return;
 
     try {
-      const created = await api.createSnippet({
-        title: title.trim(),
-        language: lang,
-        code: code.trim(),
-        tags: tags.trim(),
-        description: desc.trim(),
-      });
-      setSnippets([created, ...snippets]);
+      if (editing) {
+        const updated = await api.updateSnippet(editing.id, {
+          title: title.trim(),
+          language: lang,
+          code: code.trim(),
+          tags: tags.trim(),
+          description: desc.trim(),
+        });
+        setSnippets(snippets.map((item) => (item.id === editing.id ? updated : item)));
+      } else {
+        const created = await api.createSnippet({
+          title: title.trim(),
+          language: lang,
+          code: code.trim(),
+          tags: tags.trim(),
+          description: desc.trim(),
+        });
+        setSnippets([created, ...snippets]);
+      }
       sound.playSuccess();
       setShowModal(false);
+      setEditing(null);
       setTitle('');
       setCode('');
       setTags('');
@@ -161,7 +186,7 @@ export const SnippetsView: React.FC = () => {
 
         {/* Add Snippet Button */}
         <button
-          onClick={() => { sound.playClick(); setShowModal(true); }}
+          onClick={openCreate}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold shadow-lg shadow-amber-600/30 transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
@@ -194,9 +219,16 @@ export const SnippetsView: React.FC = () => {
                     <Star className={`w-3.5 h-3.5 ${s.is_favorite ? 'fill-amber-400 text-amber-400' : ''}`} />
                   </button>
                   <button
+                    onClick={() => openEdit(s)}
+                    className="p-1 rounded text-slate-500 hover:text-blue-400 transition-colors"
+                    title={t('common.edit')}
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button
                     onClick={() => handleDelete(s.id)}
                     className="p-1 rounded text-slate-500 hover:text-rose-400 transition-colors"
-                    title="删除"
+                    title={t('common.delete')}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -262,11 +294,11 @@ export const SnippetsView: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="glass-panel w-full max-w-md p-6 rounded-2xl border border-slate-700 shadow-2xl space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Plus className="w-4 h-4 text-amber-400" />
-              {t('snippets.new')}
+              {editing ? <Pencil className="w-4 h-4 text-amber-400" /> : <Plus className="w-4 h-4 text-amber-400" />}
+              {editing ? t('snippets.edit_title') : t('snippets.new')}
             </h3>
 
-            <form onSubmit={handleCreateSnippet} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveSnippet} className="space-y-3 text-xs">
               <div>
                 <label className="block text-slate-400 mb-1">标题 *</label>
                 <input
@@ -339,13 +371,13 @@ export const SnippetsView: React.FC = () => {
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
                 >
-                  取消
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold shadow-lg shadow-amber-600/30"
                 >
-                  保存片段
+                  {t('common.save')}
                 </button>
               </div>
             </form>

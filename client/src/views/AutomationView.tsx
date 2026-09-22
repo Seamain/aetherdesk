@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Play,
   Plus,
+  Pencil,
   Trash2,
   Terminal,
   CheckCircle2,
@@ -21,10 +22,22 @@ export const AutomationView: React.FC = () => {
 
   // Modal
   const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState<ScriptItem | null>(null);
   const [name, setName] = useState('');
   const [command, setCommand] = useState('');
   const [category, setCategory] = useState('Dev');
   const [desc, setDesc] = useState('');
+
+  const openCreate = () => {
+    setEditing(null); setName(''); setCommand(''); setCategory('Dev'); setDesc('');
+    sound.playClick(); setShowModal(true);
+  };
+
+  const openEdit = (s: ScriptItem) => {
+    setEditing(s); setName(s.name || ''); setCommand(s.command || '');
+    setCategory(s.category || 'Dev'); setDesc(s.description || '');
+    sound.playClick(); setShowModal(true);
+  };
 
   const fetchScripts = async () => {
     try {
@@ -69,7 +82,7 @@ export const AutomationView: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('确定删除此自动化脚本吗？')) return;
+    if (!confirm(t('common.confirm_delete'))) return;
     try {
       sound.playClick();
       await api.deleteScript(id);
@@ -80,20 +93,31 @@ export const AutomationView: React.FC = () => {
     }
   };
 
-  const handleCreateScript = async (e: React.FormEvent) => {
+  const handleSaveScript = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !command.trim()) return;
 
     try {
-      const created = await api.createScript({
-        name: name.trim(),
-        command: command.trim(),
-        category: category.trim(),
-        description: desc.trim(),
-      });
-      setScripts([...scripts, created]);
+      if (editing) {
+        const updated = await api.updateScript(editing.id, {
+          name: name.trim(),
+          command: command.trim(),
+          category: category.trim(),
+          description: desc.trim(),
+        });
+        setScripts(scripts.map((s) => (s.id === editing.id ? updated : s)));
+      } else {
+        const created = await api.createScript({
+          name: name.trim(),
+          command: command.trim(),
+          category: category.trim(),
+          description: desc.trim(),
+        });
+        setScripts([...scripts, created]);
+      }
       sound.playSuccess();
       setShowModal(false);
+      setEditing(null);
       setName('');
       setCommand('');
       setDesc('');
@@ -117,11 +141,11 @@ export const AutomationView: React.FC = () => {
         </div>
 
         <button
-          onClick={() => { sound.playClick(); setShowModal(true); }}
+          onClick={openCreate}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>添加脚本</span>
+          <span>{t('auto.new')}</span>
         </button>
       </div>
 
@@ -162,9 +186,17 @@ export const AutomationView: React.FC = () => {
                     </button>
 
                     <button
+                      onClick={() => openEdit(item)}
+                      className="p-1.5 rounded-lg text-slate-500 hover:text-blue-400 hover:bg-slate-800"
+                      title={t('common.edit')}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
                       onClick={() => handleDelete(item.id)}
                       className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800"
-                      title="删除"
+                      title={t('common.delete')}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -234,11 +266,11 @@ export const AutomationView: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="glass-panel w-full max-w-md p-6 rounded-2xl border border-slate-700 shadow-2xl space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Plus className="w-4 h-4 text-blue-400" />
-              配置新自动化运维脚本
+              {editing ? <Pencil className="w-4 h-4 text-blue-400" /> : <Plus className="w-4 h-4 text-blue-400" />}
+              {editing ? t('auto.edit_title') : t('auto.new')}
             </h3>
 
-            <form onSubmit={handleCreateScript} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveScript} className="space-y-3 text-xs">
               <div>
                 <label className="block text-slate-400 mb-1">脚本名称 *</label>
                 <input
@@ -291,13 +323,13 @@ export const AutomationView: React.FC = () => {
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
                 >
-                  取消
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-lg shadow-blue-600/30"
                 >
-                  保存脚本
+                  {t('common.save')}
                 </button>
               </div>
             </form>

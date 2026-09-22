@@ -107,6 +107,46 @@ describe('AetherDesk smoke (open mode, no AETHER_TOKEN)', () => {
     assert.equal(big.status, 400);
   });
 
+  it('snippet and script PATCH roundtrip', async () => {
+    const postJSON = (url, body) => fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then((r) => r.json());
+
+    const snip = await postJSON(`${BASE}/api/snippets`, {
+      title: 'patch-me', language: 'bash', code: 'echo 1', tags: 't',
+    });
+    assert.ok(snip.data.id);
+    const snipPatch = await fetch(`${BASE}/api/snippets/${snip.data.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'patched', code: 'echo 2' }),
+    });
+    assert.equal(snipPatch.status, 200);
+    assert.equal((await snipPatch.json()).data.title, 'patched');
+    await fetch(`${BASE}/api/snippets/${snip.data.id}`, { method: 'DELETE' });
+
+    const script = await postJSON(`${BASE}/api/scripts`, {
+      name: 'patch-script', command: 'echo 1', category: 'Test',
+    });
+    assert.ok(script.data.id);
+    const scriptPatch = await fetch(`${BASE}/api/scripts/${script.data.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command: 'echo 2' }),
+    });
+    assert.equal(scriptPatch.status, 200);
+    assert.equal((await scriptPatch.json()).data.command, 'echo 2');
+    const scriptMissing = await fetch(`${BASE}/api/scripts/999999`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command: 'echo x' }),
+    });
+    assert.equal(scriptMissing.status, 404);
+    await fetch(`${BASE}/api/scripts/${script.data.id}`, { method: 'DELETE' });
+  });
+
   it('webhook single delete removes only that event', async () => {
     const topic = `del-${Date.now()}`;
     const put = await fetch(`${BASE}/api/webhooks/catch/${topic}`, {
