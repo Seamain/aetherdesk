@@ -62,7 +62,7 @@ As a developer on Linux and modern tiling desktops (e.g. **Omarchy / Hyprland**)
 ### 7. 📡 Live Webhook Inbox
 - Public listener at `http://localhost:3001/api/webhooks/catch/:topic` for any HTTP method.
 - Auto-generated `curl` test command; arrivals broadcast over WebSocket with an alert chime and formatted headers/query/payload inspector.
-- Automatic retention: keeps the latest 200 events, drops anything older than 7 days.
+- Automatic retention: keeps the latest 200 events, drops anything older than 7 days (tunable via `WEBHOOK_KEEP` / `WEBHOOK_TTL_DAYS`).
 
 ### 8. 🚀 Automation Workflows
 - Built-in ops scripts: memory/cache status, disk diagnosis, connection stats, top CPU processes, Git workspace summary.

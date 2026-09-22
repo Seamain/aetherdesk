@@ -9,6 +9,9 @@ services:
       PORT: 3001
       # Uncomment to require Bearer token on dangerous APIs:
       # AETHER_TOKEN: "change-me"
+      # Webhook retention tuning (defaults: 200 events / 7 days):
+      # WEBHOOK_KEEP: "200"
+      # WEBHOOK_TTL_DAYS: "7"
     volumes:
       - ./data:/app/data
     restart: unless-stopped

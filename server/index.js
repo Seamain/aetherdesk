@@ -62,11 +62,13 @@ const limitProxy = rateLimit({ windowMs: 60_000, max: 30, keyPrefix: 'proxy' });
 const limitWebhookCatch = rateLimit({ windowMs: 60_000, max: 120, keyPrefix: 'whcatch' });
 const limitKill = rateLimit({ windowMs: 60_000, max: 10, keyPrefix: 'kill' });
 
-// Webhook retention: keep last 200 rows + drop older than 7 days
+// Webhook retention: keep last N rows + drop older than M days (env-tunable)
+const WEBHOOK_KEEP = Math.max(parseInt(process.env.WEBHOOK_KEEP || '200', 10) || 200, 1);
+const WEBHOOK_TTL_DAYS = Math.max(parseInt(process.env.WEBHOOK_TTL_DAYS || '7', 10) || 7, 1);
 function pruneWebhooks() {
   try {
-    db.prepare(`DELETE FROM webhooks WHERE id NOT IN (SELECT id FROM webhooks ORDER BY id DESC LIMIT 200)`).run();
-    db.prepare(`DELETE FROM webhooks WHERE datetime(received_at) < datetime('now', '-7 days')`).run();
+    db.prepare(`DELETE FROM webhooks WHERE id NOT IN (SELECT id FROM webhooks ORDER BY id DESC LIMIT ?)`).run(WEBHOOK_KEEP);
+    db.prepare(`DELETE FROM webhooks WHERE datetime(received_at) < datetime('now', ?)`).run(`-${WEBHOOK_TTL_DAYS} days`);
   } catch (_) {}
 }
 if (!AUTH_TOKEN) {
