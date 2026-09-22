@@ -6,6 +6,7 @@ import { useLang } from './i18n';
 
 import { Navbar } from './components/Navbar';
 import { Sidebar, type TabType } from './components/Sidebar';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 import { TelemetryView } from './views/TelemetryView';
 import { KanbanView } from './views/KanbanView';
@@ -28,6 +29,7 @@ export const App: React.FC = () => {
   // Counts for sidebar badges
   const [tasks, setTasks] = useState<Task[]>([]);
   const [webhooks, setWebhooks] = useState<WebhookEvent[]>([]);
+  const [showAuthBanner, setShowAuthBanner] = useState(false);
 
   // Telemetry rolling history for sparklines
   const [history, setHistory] = useState<{
@@ -44,10 +46,13 @@ export const App: React.FC = () => {
 
   const wsRef = useRef<WebSocket | null>(null);
 
-  // Initial data loading
+  // Initial data loading + 401 listener (server token mode)
   useEffect(() => {
     api.getTasks().then(setTasks).catch(console.error);
     api.getWebhooks().then(setWebhooks).catch(console.error);
+    const onAuth = () => setShowAuthBanner(true);
+    window.addEventListener('aether:unauthorized', onAuth);
+    return () => window.removeEventListener('aether:unauthorized', onAuth);
   }, []);
 
   // WebSocket Connection
@@ -170,6 +175,18 @@ export const App: React.FC = () => {
 
         {/* Dynamic Content View Area */}
         <main className="flex-1 p-4 md:p-6 overflow-x-hidden">
+          {showAuthBanner && (
+            <div className="mb-4 p-3 rounded-2xl border border-amber-500/40 bg-amber-950/40 text-xs text-amber-200 flex items-center justify-between gap-3">
+              <span>🔒 {t('auth.required')}</span>
+              <button
+                onClick={() => setShowAuthBanner(false)}
+                className="shrink-0 px-2.5 py-1 rounded-lg border border-amber-500/40 hover:bg-amber-900/50 transition-colors"
+              >
+                {t('auth.dismiss')}
+              </button>
+            </div>
+          )}
+          <ErrorBoundary key={activeTab} title={t('err.title')} body={t('err.body')} retry={t('err.retry')}>
           {activeTab === 'telemetry' && (
             <TelemetryView telemetry={telemetry} history={history} />
           )}
@@ -191,6 +208,7 @@ export const App: React.FC = () => {
           {activeTab === 'automation' && <AutomationView />}
 
           {activeTab === 'api_tester' && <ApiRequesterView />}
+          </ErrorBoundary>
         </main>
       </div>
 

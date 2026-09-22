@@ -25,11 +25,14 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     ...options,
   });
 
-  const json = await res.json();
-  if (!res.ok || json.success === false) {
-    throw new Error(json.error || `HTTP error ${res.status}`);
+  const json = await res.json().catch(() => ({}));
+  if (res.status === 401) {
+    try { window.dispatchEvent(new CustomEvent('aether:unauthorized')); } catch {}
   }
-  return json.data !== undefined ? json.data : json;
+  if (!res.ok || (json as any).success === false) {
+    throw new Error((json as any).error || `HTTP error ${res.status}`);
+  }
+  return (json as any).data !== undefined ? (json as any).data : json;
 }
 
 export const api = {
