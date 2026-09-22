@@ -36,7 +36,7 @@ As a developer on Linux and modern tiling desktops (e.g. **Omarchy / Hyprland**)
 ### 2. 📋 Kanban Task Board
 - Four agile columns: **To Do**, **In Progress**, **In Review**, **Done**.
 - Cards support priority (Urgent / High / Medium / Low), category, and timestamps.
-- One-click cross-column moves; everything persists to local SQLite and broadcasts over WebSocket.
+- Drag-and-drop across columns (one-click steppers kept for touch); everything persists to local SQLite and broadcasts over WebSocket.
 
 ### 3. ⏱️ Focus Pomodoro Engine
 - Circular SVG countdown with **25m focus**, **5m short break**, **15m long rest** presets plus a **custom 1–180 minute** timer.

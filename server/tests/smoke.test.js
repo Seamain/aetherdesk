@@ -107,6 +107,28 @@ describe('AetherDesk smoke (open mode, no AETHER_TOKEN)', () => {
     assert.equal(big.status, 400);
   });
 
+  it('tasks CRUD + status move roundtrip', async () => {
+    const created = await fetch(`${BASE}/api/tasks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'drag-me', priority: 'high', category: 'Test' }),
+    });
+    assert.equal(created.status, 200);
+    const task = (await created.json()).data;
+    assert.equal(task.status, 'todo');
+
+    const moved = await fetch(`${BASE}/api/tasks/${task.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'done' }),
+    });
+    assert.equal(moved.status, 200);
+    assert.equal((await moved.json()).data.status, 'done');
+
+    const del = await fetch(`${BASE}/api/tasks/${task.id}`, { method: 'DELETE' });
+    assert.equal(del.status, 200);
+  });
+
   it('snippet and script PATCH roundtrip', async () => {
     const postJSON = (url, body) => fetch(url, {
       method: 'POST',

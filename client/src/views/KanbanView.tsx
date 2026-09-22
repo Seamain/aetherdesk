@@ -24,6 +24,9 @@ export const KanbanView: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  // Native HTML5 drag-and-drop state (touch users keep prev/next steppers)
+  const [dragTaskId, setDragTaskId] = useState<number | null>(null);
+  const [dropCol, setDropCol] = useState<TaskStatus | null>(null);
 
   // New task modal state
   const [showModal, setShowModal] = useState(false);
@@ -73,8 +76,11 @@ export const KanbanView: React.FC = () => {
     let nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
 
     if (nextIndex < 0 || nextIndex >= statusOrder.length) return;
-    const nextStatus = statusOrder[nextIndex];
+    await handleMoveToStatus(task, statusOrder[nextIndex]);
+  };
 
+  const handleMoveToStatus = async (task: Task, nextStatus: TaskStatus) => {
+    if (task.status === nextStatus) return;
     try {
       const updated = await api.updateTask(task.id, { status: nextStatus });
       setTasks(tasks.map((t) => (t.id === task.id ? updated : t)));
@@ -86,6 +92,17 @@ export const KanbanView: React.FC = () => {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleDropOnColumn = async (e: React.DragEvent, colId: TaskStatus) => {
+    e.preventDefault();
+    const id = parseInt(e.dataTransfer.getData('text/plain'), 10);
+    setDropCol(null);
+    setDragTaskId(null);
+    if (isNaN(id)) return;
+    const task = tasks.find((x) => x.id === id);
+    if (!task) return;
+    await handleMoveToStatus(task, colId);
   };
 
   const handleDeleteTask = async (id: number) => {
@@ -155,6 +172,9 @@ export const KanbanView: React.FC = () => {
               <option value="low" className="bg-slate-900">低 (Low)</option>
             </select>
           </div>
+          <span className="hidden sm:inline text-[11px] text-slate-500 italic">
+            {t('kanban.drag_hint')}
+          </span>
         </div>
 
         {/* Create Task Button */}
@@ -177,7 +197,12 @@ export const KanbanView: React.FC = () => {
           return (
             <div
               key={col.id}
-              className={`glass-panel rounded-2xl p-4 border flex flex-col min-h-[520px] ${col.color}`}
+              onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDropCol(col.id); }}
+              onDragLeave={() => setDropCol((d) => (d === col.id ? null : d))}
+              onDrop={(e) => handleDropOnColumn(e, col.id)}
+              className={`glass-panel rounded-2xl p-4 border flex flex-col min-h-[520px] transition-all ${col.color} ${
+                dropCol === col.id ? 'ring-2 ring-indigo-500/70 border-indigo-400/60' : ''
+              }`}
             >
               {/* Column Header */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-3">
@@ -192,7 +217,16 @@ export const KanbanView: React.FC = () => {
                 {colTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="glass-card p-3.5 rounded-xl border border-slate-800/80 hover:border-slate-700 transition-all space-y-2.5 group"
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('text/plain', String(task.id));
+                      e.dataTransfer.effectAllowed = 'move';
+                      setDragTaskId(task.id);
+                    }}
+                    onDragEnd={() => { setDragTaskId(null); setDropCol(null); }}
+                    className={`glass-card p-3.5 rounded-xl border border-slate-800/80 hover:border-slate-700 transition-all space-y-2.5 group cursor-grab active:cursor-grabbing ${
+                      dragTaskId === task.id ? 'opacity-40' : ''
+                    }`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">
