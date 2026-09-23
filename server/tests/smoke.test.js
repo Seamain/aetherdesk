@@ -26,7 +26,7 @@ async function waitForHealth(timeoutMs = 15000) {
 before(async () => {
   child = spawn('node', ['server/index.js'], {
     cwd: ROOT,
-    env: { ...process.env, PORT: String(PORT) },
+    env: { ...process.env, PORT: String(PORT), AETHER_TOKEN: '', AUTH_TOKEN: '' },
     stdio: 'ignore',
   });
   await waitForHealth();
@@ -49,6 +49,18 @@ describe('AetherDesk smoke (open mode, no AETHER_TOKEN)', () => {
     assert.equal(res.status, 200);
     const json = await res.json();
     assert.equal(json.success, true);
+  });
+
+  it('GET /api/meta reports open-mode authRequired false', async () => {
+    const res = await fetch(`${BASE}/api/meta`);
+    assert.equal(res.status, 200);
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.equal(json.data.authRequired, false);
+    assert.equal(typeof json.data.version, 'string');
+    assert.ok(json.data.version.length > 0);
+    assert.equal(typeof json.data.webhookKeep, 'number');
+    assert.equal(typeof json.data.webhookTtlDays, 'number');
   });
 
   it('GET /api/system/status has cpu/memory/network/disk', async () => {

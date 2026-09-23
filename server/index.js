@@ -138,6 +138,26 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, status: 'ok', uptimeSeconds: Math.round(process.uptime()) });
 });
 
+// V2.1: public meta (version + auth/webhook retention flags) — no auth required
+const PKG_VERSION = (() => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8')).version || '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+})();
+app.get('/api/meta', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      version: PKG_VERSION,
+      authRequired: Boolean(AUTH_TOKEN),
+      webhookKeep: WEBHOOK_KEEP,
+      webhookTtlDays: WEBHOOK_TTL_DAYS,
+    },
+  });
+});
+
 // 1. System Endpoints
 app.get('/api/system/status', async (req, res) => {
   try {
