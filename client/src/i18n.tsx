@@ -131,6 +131,9 @@ const dictionaries = {
     'data.confirm': '恢复将覆盖现有任务/片段/脚本/笔记，继续吗？',
     'data.done': '恢复完成',
     'data.bad': '备份文件无效',
+    'meta.auth_on': '鉴权开',
+    'meta.auth_off': '鉴权关',
+    'meta.retention': 'keep{keep}/TTL{days}天',
     'api.url_ph': 'https://api.example.com/v1/...',
   },
   hant: {
@@ -239,6 +242,9 @@ const dictionaries = {
     'data.confirm': '還原將覆蓋現有任務/片段/腳本/筆記，繼續嗎？',
     'data.done': '還原完成',
     'data.bad': '備份檔無效',
+    'meta.auth_on': '鑑權開',
+    'meta.auth_off': '鑑權關',
+    'meta.retention': 'keep{keep}/TTL{days}天',
     'api.url_ph': 'https://api.example.com/v1/...',
   },
   yue: {
@@ -347,6 +353,9 @@ const dictionaries = {
     'data.confirm': '還原會冚咗現有任務/片段/腳本/筆記，繼續？',
     'data.done': '還原完成',
     'data.bad': '個備份檔唔啱',
+    'meta.auth_on': '鑑權開',
+    'meta.auth_off': '鑑權關',
+    'meta.retention': 'keep{keep}/TTL{days}日',
     'api.url_ph': 'https://api.example.com/v1/...',
   },
   en: {
@@ -455,6 +464,9 @@ const dictionaries = {
     'data.confirm': 'Restore will overwrite tasks/snippets/scripts/notes. Continue?',
     'data.done': 'Restored',
     'data.bad': 'Invalid backup file',
+    'meta.auth_on': 'Auth on',
+    'meta.auth_off': 'Auth off',
+    'meta.retention': 'keep{keep}/TTL{days}d',
     'api.url_ph': 'https://api.example.com/v1/...',
   },
 } as const;

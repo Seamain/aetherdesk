@@ -215,6 +215,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </div>
 
+      {/* Footer Info */}
       <div className="glass-panel p-3 rounded-xl space-y-2">
         <div>
           <div className="text-xs text-slate-400 font-medium">{t('side.footer')}</div>
@@ -227,10 +228,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           {meta && (
             <div className="mt-2 text-[10px] text-slate-400 font-mono leading-relaxed break-all">
-              {`v${versionText || '-'}`}
-              {' | '}
+              {`v${versionText || '—'}`}
+              {' · '}
               {(authLabel || '').slice(0)}
-              {' | '}
+              {' · '}
               {(retentionLabel || '').slice(0)}
             </div>
           )}
