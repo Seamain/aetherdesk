@@ -14,7 +14,6 @@ const isLang = (v: unknown): v is Lang =>
 
 const dictionaries = {
   zh: {
-    // Navbar
     'nav.subtitle': 'Linux 个人开发工作台',
     'nav.mute': '静音',
     'nav.white': '白噪音 (专注)',
@@ -22,7 +21,6 @@ const dictionaries = {
     'nav.rain': '雨声合成 (舒缓)',
     'nav.live': '实时同步中',
     'nav.offline': '连接中断',
-    // Sidebar
     'side.title': '控制台模块 (HUD Modules)',
     'side.footer': 'AetherDesk Linux Hub',
     'side.sub': 'Local SQLite & Telemetry',
@@ -36,7 +34,6 @@ const dictionaries = {
     'tab.webhooks': 'Webhook 盒',
     'tab.automation': '自动化运维',
     'tab.api_tester': 'HTTP 调试器',
-    // Common
     'common.search': '搜索...',
     'common.cancel': '取消',
     'common.save': '保存',
@@ -48,7 +45,6 @@ const dictionaries = {
     'common.confirm_delete': '确定删除吗？',
     'common.empty': '暂无数据',
     'common.loading': '加载中...',
-    // Notes
     'notes.search_ph': '搜索笔记标题或内容...',
     'notes.new': '新建笔记',
     'notes.edit': '编辑笔记',
@@ -58,7 +54,6 @@ const dictionaries = {
     'notes.pinned_badge': '置顶',
     'notes.empty': '暂无笔记，点击右上新建',
     'notes.click_edit': '点击卡片编辑',
-    // Kanban
     'kanban.search_ph': '搜索任务或标签...',
     'kanban.all_priority': '全部优先级',
     'kanban.new': '新建任务卡片',
@@ -71,7 +66,6 @@ const dictionaries = {
     'kanban.create_title': '创建新任务卡片',
     'kanban.name': '任务名称 *',
     'kanban.desc': '任务描述',
-    // Focus
     'focus.today_count': '今日完成番茄钟',
     'focus.today_minutes': '今日专注总时长',
     'focus.mode': '当前模式',
@@ -84,24 +78,20 @@ const dictionaries = {
     'focus.custom_suffix': '分钟 (1-180，留空用预设)',
     'focus.history': '最近专注日志',
     'focus.empty_log': '暂无完成记录，点击上方开启专注吧！',
-    // Telemetry
     'tele.cpu': 'CPU 负载',
     'tele.mem': '内存分布',
     'tele.net': '网络吞吐',
     'tele.disk': '磁盘存储',
     'tele.procs': 'TOP 资源进程',
     'tele.kill': '终止',
-    // Runner
     'runner.run': '运行',
     'runner.output': '运行输出',
     'runner.lang': '运行语言',
-    // Snippets
     'snippets.search_ph': '搜索片段库、语法或说明...',
     'snippets.new': '新建代码片段',
     'snippets.edit_title': '编辑代码片段',
     'snippets.all': '全部',
     'snippets.empty': '暂无匹配的代码片段',
-    // Webhooks
     'wh.waiting': '等待请求抵达...',
     'wh.send_test': '发送测试包',
     'wh.title': '实时 Webhook 捕获箱 (Live Sink)',
@@ -112,11 +102,9 @@ const dictionaries = {
     'wh.delete_one': '删除这条记录',
     'wh.clear': '清空记录',
     'wh.inspector': '数据包深度解析 (Packet Inspector)',
-    // Automation
     'auto.run': '执行',
     'auto.new': '新建脚本',
     'auto.edit_title': '编辑脚本',
-    // API tester
     'api.send': '发送请求',
     'api.history': '历史记录',
     'api.clear': '清空',
