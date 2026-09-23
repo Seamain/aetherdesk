@@ -142,7 +142,7 @@ describe('AetherDesk smoke (open mode, no AETHER_TOKEN)', () => {
     const exp = await fetch(`${BASE}/api/backup/export`);
     assert.equal(exp.status, 200);
     const payload = (await exp.json()).data;
-    for (const k of ['tasks', 'snippets', 'scripts', 'notes']) {
+    for (const k of ['tasks', 'snippets', 'scripts', 'notes', 'pomodoro_logs']) {
       assert.ok(Array.isArray(payload[k]), `export missing array: ${k}`);
     }
 
@@ -161,6 +161,7 @@ describe('AetherDesk smoke (open mode, no AETHER_TOKEN)', () => {
         snippets: payload.snippets,
         scripts: payload.scripts,
         notes: [...payload.notes, {}],
+        pomodoro_logs: [...payload.pomodoro_logs, { mode: 'work' }],
       }),
     });
     assert.equal(imp.status, 200);
@@ -169,7 +170,8 @@ describe('AetherDesk smoke (open mode, no AETHER_TOKEN)', () => {
     assert.equal(counts.snippets, payload.snippets.length);
     assert.equal(counts.scripts, payload.scripts.length);
     assert.equal(counts.notes, payload.notes.length);
-    assert.equal(counts.skipped, 1);
+    assert.equal(counts.pomodoro_logs, payload.pomodoro_logs.length);
+    assert.equal(counts.skipped, 2);
   });
 
   it('tasks CRUD + status move roundtrip', async () => {

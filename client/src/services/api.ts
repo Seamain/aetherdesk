@@ -168,9 +168,23 @@ export const api = {
     snippets: unknown[];
     scripts: unknown[];
     notes: unknown[];
+    pomodoro_logs: unknown[];
   }>('/backup/export'),
-  importBackup: (data: { tasks?: unknown[]; snippets?: unknown[]; scripts?: unknown[]; notes?: unknown[] }) =>
-    request<{ tasks: number; snippets: number; scripts: number; notes: number; skipped: number }>('/backup/import', {
+  importBackup: (data: {
+    tasks?: unknown[];
+    snippets?: unknown[];
+    scripts?: unknown[];
+    notes?: unknown[];
+    pomodoro_logs?: unknown[];
+  }) =>
+    request<{
+      tasks: number;
+      snippets: number;
+      scripts: number;
+      notes: number;
+      pomodoro_logs: number;
+      skipped: number;
+    }>('/backup/import', {
       method: 'POST',
       body: JSON.stringify(data),
     }),

@@ -160,7 +160,7 @@ pnpm test   # node:test backend smoke suite: health, telemetry, clamps, SSRF blo
 ```
 
 ### Backup & restore
-Sidebar footer → Export downloads versioned JSON (tasks/snippets/scripts/notes); Restore replaces those tables transactionally (invalid rows skipped, counts reported). API: `GET /api/backup/export`, `POST /api/backup/import`.
+Sidebar footer → Export downloads versioned JSON (tasks/snippets/scripts/notes/pomodoro_logs); Restore replaces those tables transactionally (invalid rows skipped, counts reported). Webhooks stay out of backup. API: `GET /api/backup/export`, `POST /api/backup/import`.
 
 ---
 

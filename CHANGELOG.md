@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.3.0 — Backup pomodoro_logs + parallel tests
+- Backup export/import includes `pomodoro_logs` (transactional replace; invalid rows skipped)
+- `pnpm test` no longer forces `--test-concurrency=1` (suites use isolated `AETHER_DB_PATH`)
+- Docs: README backup section + this changelog
+
+## 2.2.0 — Test DB isolation
+- `AETHER_DB_PATH` for configurable SQLite path; auth/smoke suites use separate DBs
+
 ## 2.1.0 — Auth smoke + runtime meta + repo polish
 - `GET /api/meta` (version, authRequired, webhook retention); Sidebar footer meta + i18n
 - Auth regression suite (open-mode + token mode 401/200)

@@ -92,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     try {
       const res = await api.importBackup(parsed);
       sound.playSuccess();
-      alert(`${t('data.done')}: tasks ${res.tasks}, snippets ${res.snippets}, scripts ${res.scripts}, notes ${res.notes}`);
+      alert(`${t('data.done')}: tasks ${res.tasks}, snippets ${res.snippets}, scripts ${res.scripts}, notes ${res.notes}, ${t('data.backup_logs')} ${res.pomodoro_logs}`);
       window.location.reload();
     } catch (err: any) {
       alert(err.message);

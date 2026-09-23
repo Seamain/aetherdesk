@@ -547,19 +547,20 @@ app.post('/api/proxy/request', requireAuth, limitProxy, async (req, res) => {
   }
 });
 
-// 10. Backup Export / Import (user-data tables; webhooks & pomodoro logs excluded)
+// 10. Backup Export / Import (user-data tables; webhooks excluded)
 app.get('/api/backup/export', requireAuth, (req, res) => {
   try {
     res.json({
       success: true,
       data: {
         app: 'aetherdesk',
-        version: '2.0.0',
+        version: PKG_VERSION,
         exported_at: new Date().toISOString(),
         tasks: db.prepare('SELECT * FROM tasks ORDER BY id ASC').all(),
         snippets: db.prepare('SELECT * FROM snippets ORDER BY id ASC').all(),
         scripts: db.prepare('SELECT * FROM scripts ORDER BY id ASC').all(),
         notes: db.prepare('SELECT * FROM notes ORDER BY id ASC').all(),
+        pomodoro_logs: db.prepare('SELECT * FROM pomodoro_logs ORDER BY id ASC').all(),
       },
     });
   } catch (err) {
@@ -568,8 +569,8 @@ app.get('/api/backup/export', requireAuth, (req, res) => {
 });
 
 app.post('/api/backup/import', requireAuth, (req, res) => {
-  const { tasks = [], snippets = [], scripts = [], notes = [] } = req.body || {};
-  for (const [key, val] of Object.entries({ tasks, snippets, scripts, notes })) {
+  const { tasks = [], snippets = [], scripts = [], notes = [], pomodoro_logs = [] } = req.body || {};
+  for (const [key, val] of Object.entries({ tasks, snippets, scripts, notes, pomodoro_logs })) {
     if (!Array.isArray(val)) {
       return res.status(400).json({ success: false, error: `Field '${key}' must be an array` });
     }
@@ -581,7 +582,7 @@ app.post('/api/backup/import', requireAuth, (req, res) => {
     db.exec('BEGIN');
     let result;
     try {
-      const counts = { tasks: 0, snippets: 0, scripts: 0, notes: 0, skipped: 0 };
+      const counts = { tasks: 0, snippets: 0, scripts: 0, notes: 0, pomodoro_logs: 0, skipped: 0 };
 
       db.prepare('DELETE FROM tasks').run();
       const insTask = db.prepare(`INSERT INTO tasks (title, description, status, priority, category, due_date) VALUES (?, ?, ?, ?, ?, ?)`);
@@ -624,6 +625,22 @@ app.post('/api/backup/import', requireAuth, (req, res) => {
         if (!r || !nonEmpty(r.title)) { counts.skipped++; continue; }
         insNote.run(r.title.trim(), typeof r.content === 'string' ? r.content : '', r.pinned ? 1 : 0);
         counts.notes++;
+      }
+
+      db.prepare('DELETE FROM pomodoro_logs').run();
+      const insPomo = db.prepare(`INSERT INTO pomodoro_logs (mode, duration_seconds, task_title, completed_at) VALUES (?, ?, ?, ?)`);
+      const insPomoNoAt = db.prepare(`INSERT INTO pomodoro_logs (mode, duration_seconds, task_title) VALUES (?, ?, ?)`);
+      for (const r of pomodoro_logs) {
+        const dur = r && (typeof r.duration_seconds === 'number' ? r.duration_seconds : Number(r?.duration_seconds));
+        if (!r || !Number.isFinite(dur) || dur < 1) { counts.skipped++; continue; }
+        const mode = typeof r.mode === 'string' && r.mode.trim() ? r.mode.trim() : 'work';
+        const taskTitle = typeof r.task_title === 'string' ? r.task_title : '';
+        if (typeof r.completed_at === 'string' && r.completed_at.trim()) {
+          insPomo.run(mode, Math.floor(dur), taskTitle, r.completed_at.trim());
+        } else {
+          insPomoNoAt.run(mode, Math.floor(dur), taskTitle);
+        }
+        counts.pomodoro_logs++;
       }
 
       result = counts;
