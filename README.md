@@ -3,10 +3,13 @@
 > *Next-generation developer cockpit for Linux power users — Kanban, sandbox, snippets, notes, webhooks, automation, and focus timer in one dashboard.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-indigo.svg)](LICENSE)
+[![CI](https://github.com/Seamain/aetherdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/Seamain/aetherdesk/actions/workflows/ci.yml)
 [![Node.js](https://img.shields.io/badge/Node.js-v24.x-emerald.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-v19.x-blue.svg)](https://react.dev/)
 [![SQLite](https://img.shields.io/badge/SQLite-Native_WAL-amber.svg)](https://sqlite.org/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-v4.x-cyan.svg)](https://tailwindcss.com/)
+
+> **Authorship:** This project is **fully designed and developed by AI agents**. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
@@ -95,7 +98,7 @@ As a developer on Linux and modern tiling desktops (e.g. **Omarchy / Hyprland**)
                         │  (/proc & Linux) │ (Bash / Py / JS) │
                         ├──────────────────┴──────────────────┤
                         │          SQLite Engine              │
-                        │  (node:sqlite WAL Concurrent DB)    │
+                        │        (node:sqlite WAL Concurrent DB)    │
                         └─────────────────────────────────────┘
 ```
 
@@ -112,7 +115,7 @@ As a developer on Linux and modern tiling desktops (e.g. **Omarchy / Hyprland**)
 
 ### Prerequisites
 - **Linux** (Arch, Ubuntu, Debian, Fedora, Omarchy, …)
-- **Node.js** >= 22 (24+ recommended — ships `node:sqlite` natively)
+- **Node.js** >= 24 (required — ships `node:sqlite`; CI and `engines` pin 24+)
 - **pnpm** (managed via `corepack`, pinned in `packageManager`)
 
 ### Quick start
@@ -167,6 +170,7 @@ Sidebar footer → Export downloads versioned JSON (tasks/snippets/scripts/notes
 | :--- | :--- | :--- |
 | `WS` | `/ws` | Telemetry every 1200 ms + webhook/task broadcasts |
 | `GET` | `/healthz`, `/api/health` | Liveness / readiness |
+| `GET` | `/api/meta` | Runtime version, authRequired, webhook retention |
 | `GET` | `/api/system/status` | Kernel, CPU, memory, network, disk snapshot |
 | `GET` | `/api/system/processes?limit=15` | Top processes (limit clamped 1–50) |
 | `POST` | `/api/system/kill-process` | Kill by PID 🔒 |
@@ -179,7 +183,6 @@ Sidebar footer → Export downloads versioned JSON (tasks/snippets/scripts/notes
 | `GET`/`POST` | `/api/scripts` | List / create automation scripts (create 🔒) |
 | `PATCH`/`DELETE` | `/api/scripts/:id` | Update / delete a script 🔒 |
 | `POST` | `/api/scripts/:id/run` | Execute a script 🔒 |
-| `DELETE` | `/api/scripts/:id` | Delete a script 🔒 |
 | `POST` | `/api/runner/run` | Sandbox exec (bash/python/node) 🔒 |
 | `GET` | `/api/webhooks` | Latest 50 captured events |
 | `DELETE` | `/api/webhooks` | Clear inbox 🔒 |
@@ -192,6 +195,12 @@ Sidebar footer → Export downloads versioned JSON (tasks/snippets/scripts/notes
 | `POST` | `/api/proxy/request` | Proxied HTTP debug request 🔒 |
 
 🔒 = requires `Bearer` token when `AETHER_TOKEN` is set; always rate-limited.
+
+---
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for start commands, acceptance checks, commit format, and who may push.
 
 ---
 
