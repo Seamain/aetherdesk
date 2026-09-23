@@ -1,13 +1,21 @@
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
 import path from 'node:path';
+import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..', '..');
 const PORT = 3101;
 const BASE = `http://127.0.0.1:${PORT}`;
+const DB_FILE = path.join(ROOT, 'data', 'aetherdesk-smoke-test.db');
+
+function cleanDbArtifacts(file) {
+  for (const p of [file, `${file}-wal`, `${file}-shm`]) {
+    try { fs.unlinkSync(p); } catch {}
+  }
+}
 
 let child = null;
 
@@ -24,16 +32,27 @@ async function waitForHealth(timeoutMs = 15000) {
 }
 
 before(async () => {
+  cleanDbArtifacts(DB_FILE);
   child = spawn('node', ['server/index.js'], {
     cwd: ROOT,
-    env: { ...process.env, PORT: String(PORT), AETHER_TOKEN: '', AUTH_TOKEN: '' },
+    env: {
+      ...process.env,
+      PORT: String(PORT),
+      AETHER_TOKEN: '',
+      AUTH_TOKEN: '',
+      AETHER_DB_PATH: DB_FILE,
+    },
     stdio: 'ignore',
   });
   await waitForHealth();
 });
 
 after(() => {
-  if (child) child.kill('SIGTERM');
+  if (child) {
+    child.kill('SIGTERM');
+    child = null;
+  }
+  cleanDbArtifacts(DB_FILE);
 });
 
 describe('AetherDesk smoke (open mode, no AETHER_TOKEN)', () => {
@@ -137,7 +156,6 @@ describe('AetherDesk smoke (open mode, no AETHER_TOKEN)', () => {
     const imp = await fetch(`${BASE}/api/backup/import`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // Full re-import of the just-exported payload (+1 invalid note) keeps DB content stable
       body: JSON.stringify({
         tasks: payload.tasks,
         snippets: payload.snippets,

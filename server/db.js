@@ -6,12 +6,14 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
+// AETHER_DB_PATH: absolute path, or relative to project root (default data/aetherdesk.db)
+const DB_REL = process.env.AETHER_DB_PATH || 'data/aetherdesk.db';
+const DB_PATH = path.isAbsolute(DB_REL) ? DB_REL : path.join(__dirname, '..', DB_REL);
+const DATA_DIR = path.dirname(DB_PATH);
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-const DB_PATH = path.join(DATA_DIR, 'aetherdesk.db');
 export const db = new DatabaseSync(DB_PATH);
 
 // Initialize schema

@@ -11,6 +11,13 @@ const PORT = 3102;
 const BASE = `http://127.0.0.1:${PORT}`;
 const TOKEN = 'secret123';
 const PKG = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+const DB_FILE = path.join(ROOT, 'data', 'aetherdesk-auth-test.db');
+
+function cleanDbArtifacts(file) {
+  for (const p of [file, `${file}-wal`, `${file}-shm`]) {
+    try { fs.unlinkSync(p); } catch {}
+  }
+}
 
 let child = null;
 
@@ -27,6 +34,7 @@ async function waitForHealth(timeoutMs = 15000) {
 }
 
 before(async () => {
+  cleanDbArtifacts(DB_FILE);
   child = spawn('node', ['server/index.js'], {
     cwd: ROOT,
     env: {
@@ -34,6 +42,7 @@ before(async () => {
       PORT: String(PORT),
       AETHER_TOKEN: TOKEN,
       AUTH_TOKEN: '',
+      AETHER_DB_PATH: DB_FILE,
     },
     stdio: 'ignore',
   });
@@ -41,7 +50,11 @@ before(async () => {
 });
 
 after(() => {
-  if (child) child.kill('SIGTERM');
+  if (child) {
+    child.kill('SIGTERM');
+    child = null;
+  }
+  cleanDbArtifacts(DB_FILE);
 });
 
 describe('AetherDesk auth mode (AETHER_TOKEN set)', () => {
