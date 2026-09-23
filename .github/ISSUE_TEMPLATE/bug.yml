@@ -1,0 +1,26 @@
+name: Bug report
+description: Something broken in AetherDesk
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Expected vs actual
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduce
+      description: Steps, env (OS / Node / pnpm), commands
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: From GET /api/meta or package.json
+    validations:
+      required: false
