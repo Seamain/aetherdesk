@@ -1,6 +1,6 @@
 {
   "name": "aetherdesk",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Next-Gen Linux Developer Cockpit & System Telemetry HUD",
   "main": "server/index.js",
   "type": "module",
@@ -22,12 +22,15 @@
     "webhook",
     "omarchy"
   ],
-  "author": "Antigravity",
+  "author": "Seamain",
   "license": "MIT",
   "packageManager": "pnpm@12.5.1",
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "ws": "^8.21.3"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }
