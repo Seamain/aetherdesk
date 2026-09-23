@@ -10,7 +10,8 @@ import {
   Globe,
   StickyNote,
   Download,
-  Upload
+  Upload,
+  Settings
 } from 'lucide-react';
 import { useLang } from '../i18n';
 import { api } from '../services/api';
@@ -25,7 +26,8 @@ export type TabType =
   | 'notes'
   | 'webhooks'
   | 'automation'
-  | 'api_tester';
+  | 'api_tester'
+  | 'settings';
 
 interface SidebarProps {
   activeTab: TabType;
@@ -161,6 +163,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: <Globe className="w-4 h-4" />,
       color: 'text-violet-400',
     },
+    {
+      id: 'settings',
+      label: t('tab.settings'),
+      icon: <Settings className="w-4 h-4" />,
+      color: 'text-slate-300',
+    },
   ];
 
   const versionText = (meta?.version || '').slice(0);
@@ -227,13 +235,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {t('side.telemetry_on')}
           </div>
           {meta && (
-            <div className="mt-2 text-[10px] text-slate-400 font-mono leading-relaxed break-all">
+            <button
+              type="button"
+              onClick={() => onSelectTab('settings')}
+              className="mt-2 w-full text-left text-[10px] text-slate-400 hover:text-slate-200 font-mono leading-relaxed break-all transition-colors"
+              title={t('tab.settings')}
+            >
               {`v${versionText || '—'}`}
               {' · '}
               {(authLabel || '').slice(0)}
               {' · '}
               {(retentionLabel || '').slice(0)}
-            </div>
+            </button>
           )}
         </div>
         <div className="flex items-center gap-2 pt-2 border-t border-slate-800/60">

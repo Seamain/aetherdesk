@@ -154,6 +154,8 @@ app.get('/api/meta', (req, res) => {
       authRequired: Boolean(AUTH_TOKEN),
       webhookKeep: WEBHOOK_KEEP,
       webhookTtlDays: WEBHOOK_TTL_DAYS,
+      node: process.version,
+      platform: process.platform,
     },
   });
 });

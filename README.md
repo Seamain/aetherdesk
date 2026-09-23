@@ -170,7 +170,7 @@ Sidebar footer → Export downloads versioned JSON (tasks/snippets/scripts/notes
 | :--- | :--- | :--- |
 | `WS` | `/ws` | Telemetry every 1200 ms + webhook/task broadcasts |
 | `GET` | `/healthz`, `/api/health` | Liveness / readiness |
-| `GET` | `/api/meta` | Runtime version, authRequired, webhook retention |
+| `GET` | `/api/meta` | Runtime version, authRequired, webhook retention, node (`process.version`), platform (`process.platform`) |
 | `GET` | `/api/system/status` | Kernel, CPU, memory, network, disk snapshot |
 | `GET` | `/api/system/processes?limit=15` | Top processes (limit clamped 1–50) |
 | `POST` | `/api/system/kill-process` | Kill by PID 🔒 |

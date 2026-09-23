@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.0 — Settings/meta UX
+- `GET /api/meta` adds read-only `node` / `platform` (still public, no auth)
+- Settings/meta UX on the client (Frontend)
+- Version bump to 2.4.0
+
 ## 2.3.0 — Backup pomodoro_logs + parallel tests
 - Backup export/import includes `pomodoro_logs` (transactional replace; invalid rows skipped)
 - `pnpm test` no longer forces `--test-concurrency=1` (suites use isolated `AETHER_DB_PATH`)

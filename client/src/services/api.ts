@@ -157,6 +157,8 @@ export const api = {
     authRequired: boolean;
     webhookKeep: number;
     webhookTtlDays: number;
+    node?: string;
+    platform?: string;
   }>('/meta'),
 
   // Backup export / import

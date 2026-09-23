@@ -67,8 +67,12 @@ describe('AetherDesk auth mode (AETHER_TOKEN set)', () => {
     assert.equal(json.data.version, PKG.version);
     assert.equal(typeof json.data.webhookKeep, 'number');
     assert.equal(typeof json.data.webhookTtlDays, 'number');
-    assert.ok(json.data.webhookKeep >= 1);
-    assert.ok(json.data.webhookTtlDays >= 1);
+    assert.ok(Number.isInteger(json.data.webhookKeep) && json.data.webhookKeep >= 1);
+    assert.ok(Number.isInteger(json.data.webhookTtlDays) && json.data.webhookTtlDays >= 1);
+    assert.equal(typeof json.data.node, 'string');
+    assert.ok(json.data.node.startsWith('v'));
+    assert.equal(typeof json.data.platform, 'string');
+    assert.ok(json.data.platform.length > 0);
   });
 
   it('dangerous endpoints return 401 without Bearer', async () => {

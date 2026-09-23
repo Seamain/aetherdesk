@@ -17,6 +17,7 @@ import { NotesView } from './views/NotesView';
 import { WebhooksView } from './views/WebhooksView';
 import { AutomationView } from './views/AutomationView';
 import { ApiRequesterView } from './views/ApiRequesterView';
+import { SettingsView } from './views/SettingsView';
 
 export const App: React.FC = () => {
   const { t } = useLang();
@@ -202,12 +203,14 @@ export const App: React.FC = () => {
           {activeTab === 'notes' && <NotesView />}
 
           {activeTab === 'webhooks' && (
-            <WebhooksView webhooks={webhooks} onClearWebhooks={handleClearWebhooks} onDeleteWebhook={handleDeleteWebhook} />
+            <WebhooksView webhooks={webhooks} onClearWebhooks={handleClearWebhooks} onDeleteWebhook={handleDeleteWebhook} onOpenSettings={() => setActiveTab('settings')} />
           )}
 
           {activeTab === 'automation' && <AutomationView />}
 
           {activeTab === 'api_tester' && <ApiRequesterView />}
+
+          {activeTab === 'settings' && <SettingsView />}
           </ErrorBoundary>
         </main>
       </div>
@@ -224,6 +227,7 @@ export const App: React.FC = () => {
           ['webhooks', t('tab.webhooks')],
           ['automation', t('tab.automation')],
           ['api_tester', t('tab.api_tester')],
+          ['settings', t('tab.settings')],
         ] as Array<[TabType, string]>).map(([id, label]) => (
           <button key={id} onClick={() => { sound.playClick(); setActiveTab(id); window.scrollTo({ top: 0 }); }}
             className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium min-w-[52px] ${activeTab === id ? 'bg-indigo-950/80 text-white border border-indigo-500/40' : 'text-slate-400'}`}>

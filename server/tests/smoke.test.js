@@ -80,6 +80,12 @@ describe('AetherDesk smoke (open mode, no AETHER_TOKEN)', () => {
     assert.ok(json.data.version.length > 0);
     assert.equal(typeof json.data.webhookKeep, 'number');
     assert.equal(typeof json.data.webhookTtlDays, 'number');
+    assert.ok(Number.isInteger(json.data.webhookKeep) && json.data.webhookKeep >= 1);
+    assert.ok(Number.isInteger(json.data.webhookTtlDays) && json.data.webhookTtlDays >= 1);
+    assert.equal(typeof json.data.node, 'string');
+    assert.ok(json.data.node.startsWith('v'));
+    assert.equal(typeof json.data.platform, 'string');
+    assert.ok(json.data.platform.length > 0);
   });
 
   it('GET /api/system/status has cpu/memory/network/disk', async () => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Webhook,
   Copy,
@@ -11,15 +11,32 @@ import {
 import type { WebhookEvent } from '../types';
 import { sound } from '../services/audio';
 import { useLang } from '../i18n';
+import { api } from '../services/api';
 
 interface WebhooksViewProps {
   webhooks: WebhookEvent[];
   onClearWebhooks: () => void;
   onDeleteWebhook: (id: number) => void;
+  onOpenSettings?: () => void;
 }
 
-export const WebhooksView: React.FC<WebhooksViewProps> = ({ webhooks, onClearWebhooks, onDeleteWebhook }) => {
+export const WebhooksView: React.FC<WebhooksViewProps> = ({ webhooks, onClearWebhooks, onDeleteWebhook, onOpenSettings }) => {
   const { t } = useLang();
+  const [retentionHint, setRetentionHint] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    api.getMeta()
+      .then((m) => {
+        if (cancelled || !m) return;
+        const hint = t('webhooks.retention_hint')
+          .replace('{keep}', String(m.webhookKeep ?? ''))
+          .replace('{days}', String(m.webhookTtlDays ?? ''));
+        setRetentionHint(hint);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [t]);
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [copiedCurl, setCopiedCurl] = useState(false);
   const [selectedHook, setSelectedHook] = useState<WebhookEvent | null>(null);
@@ -106,6 +123,20 @@ export const WebhooksView: React.FC<WebhooksViewProps> = ({ webhooks, onClearWeb
 
   return (
     <div className="space-y-6">
+      {retentionHint && (
+        <div className="glass-panel px-4 py-2.5 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-300">
+          <span className="font-mono break-all">{(retentionHint || '').slice(0)}</span>
+          {onOpenSettings && (
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              className="shrink-0 px-2.5 py-1 rounded-lg border border-slate-700 hover:bg-slate-900/80 text-slate-200 transition-colors"
+            >
+              {t('webhooks.open_settings')}
+            </button>
+          )}
+        </div>
+      )}
       {/* Top Banner: Webhook URL & cURL sample */}
       <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
