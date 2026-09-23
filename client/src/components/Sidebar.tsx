@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   Activity,
   Kanban,
@@ -8,9 +8,13 @@ import {
   Webhook,
   PlayCircle,
   Globe,
-  StickyNote
+  StickyNote,
+  Download,
+  Upload
 } from 'lucide-react';
 import { useLang } from '../i18n';
+import { api } from '../services/api';
+import { sound } from '../services/audio';
 
 export type TabType =
   | 'telemetry'
@@ -37,6 +41,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
   taskCount,
 }) => {
   const { t } = useLang();
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleExport = async () => {
+    try {
+      sound.playClick();
+      const data = await api.exportBackup();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `aetherdesk-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      sound.playSuccess();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    let parsed: any;
+    try {
+      parsed = JSON.parse(await file.text());
+    } catch {
+      alert(t('data.bad'));
+      return;
+    }
+    if (!parsed || typeof parsed !== 'object' || !confirm(t('data.confirm'))) return;
+    try {
+      const res = await api.importBackup(parsed);
+      sound.playSuccess();
+      alert(`${t('data.done')}: tasks ${res.tasks}, snippets ${res.snippets}, scripts ${res.scripts}, notes ${res.notes}`);
+      window.location.reload();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
   const menuItems: Array<{
     id: TabType;
     label: string;
@@ -145,14 +188,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Footer Info */}
-      <div className="p-3 bg-slate-900/40 border border-slate-800/60 rounded-xl">
-        <div className="text-xs text-slate-400 font-medium">{t('side.footer')}</div>
-        <div className="text-[11px] text-slate-500 mt-0.5">
-          {t('side.sub')}
+      <div className="p-3 bg-slate-900/40 border border-slate-800/60 rounded-xl space-y-2">
+        <div>
+          <div className="text-xs text-slate-400 font-medium">{t('side.footer')}</div>
+          <div className="text-[11px] text-slate-500 mt-0.5">
+            {t('side.sub')}
+          </div>
+          <div className="mt-2 text-[10px] text-emerald-400 font-mono flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+            {t('side.telemetry_on')}
+          </div>
         </div>
-        <div className="mt-2 text-[10px] text-emerald-400 font-mono flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-          {t('side.telemetry_on')}
+        <div className="flex items-center gap-2 pt-2 border-t border-slate-800/60">
+          <button
+            onClick={handleExport}
+            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-slate-300 text-[11px] font-medium transition-colors"
+            title={t('data.export')}
+          >
+            <Download className="w-3 h-3" />
+            <span>{t('data.export')}</span>
+          </button>
+          <button
+            onClick={() => fileRef.current?.click()}
+            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-slate-300 text-[11px] font-medium transition-colors"
+            title={t('data.import')}
+          >
+            <Upload className="w-3 h-3" />
+            <span>{t('data.import')}</span>
+          </button>
+          <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={handleImportFile} />
         </div>
       </div>
     </aside>

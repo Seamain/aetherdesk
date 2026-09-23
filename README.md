@@ -156,6 +156,9 @@ curl http://localhost:3001/healthz
 pnpm test   # node:test backend smoke suite: health, telemetry, clamps, SSRF blocks, runner, webhooks
 ```
 
+### Backup & restore
+Sidebar footer → Export downloads versioned JSON (tasks/snippets/scripts/notes); Restore replaces those tables transactionally (invalid rows skipped, counts reported). API: `GET /api/backup/export`, `POST /api/backup/import`.
+
 ---
 
 ## 🔌 API Reference
@@ -184,6 +187,8 @@ pnpm test   # node:test backend smoke suite: health, telemetry, clamps, SSRF blo
 | `ALL` | `/api/webhooks/catch/:topic` | Universal webhook receiver |
 | `GET` | `/api/pomodoro/stats` | Recent logs + today's totals |
 | `POST` | `/api/pomodoro/log` | Log a completed session |
+| `GET` | `/api/backup/export` | Versioned JSON dump 🔒 |
+| `POST` | `/api/backup/import` | Transactional restore 🔒 |
 | `POST` | `/api/proxy/request` | Proxied HTTP debug request 🔒 |
 
 🔒 = requires `Bearer` token when `AETHER_TOKEN` is set; always rate-limited.

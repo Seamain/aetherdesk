@@ -107,6 +107,41 @@ describe('AetherDesk smoke (open mode, no AETHER_TOKEN)', () => {
     assert.equal(big.status, 400);
   });
 
+  it('backup export + import roundtrip', async () => {
+    const exp = await fetch(`${BASE}/api/backup/export`);
+    assert.equal(exp.status, 200);
+    const payload = (await exp.json()).data;
+    for (const k of ['tasks', 'snippets', 'scripts', 'notes']) {
+      assert.ok(Array.isArray(payload[k]), `export missing array: ${k}`);
+    }
+
+    const bad = await fetch(`${BASE}/api/backup/import`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tasks: 'nope' }),
+    });
+    assert.equal(bad.status, 400);
+
+    const imp = await fetch(`${BASE}/api/backup/import`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      // Full re-import of the just-exported payload (+1 invalid note) keeps DB content stable
+      body: JSON.stringify({
+        tasks: payload.tasks,
+        snippets: payload.snippets,
+        scripts: payload.scripts,
+        notes: [...payload.notes, {}],
+      }),
+    });
+    assert.equal(imp.status, 200);
+    const counts = (await imp.json()).data;
+    assert.equal(counts.tasks, payload.tasks.length);
+    assert.equal(counts.snippets, payload.snippets.length);
+    assert.equal(counts.scripts, payload.scripts.length);
+    assert.equal(counts.notes, payload.notes.length);
+    assert.equal(counts.skipped, 1);
+  });
+
   it('tasks CRUD + status move roundtrip', async () => {
     const created = await fetch(`${BASE}/api/tasks`, {
       method: 'POST',

@@ -150,4 +150,20 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  // Backup export / import
+  exportBackup: () => request<{
+    app: string;
+    version: string;
+    exported_at: string;
+    tasks: unknown[];
+    snippets: unknown[];
+    scripts: unknown[];
+    notes: unknown[];
+  }>('/backup/export'),
+  importBackup: (data: { tasks?: unknown[]; snippets?: unknown[]; scripts?: unknown[]; notes?: unknown[] }) =>
+    request<{ tasks: number; snippets: number; scripts: number; notes: number; skipped: number }>('/backup/import', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };

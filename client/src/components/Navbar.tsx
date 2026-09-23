@@ -49,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               AETHER<span className="text-white font-semibold">DESK</span>
             </span>
             <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 border border-indigo-500/30">
-              v1.0 Pro
+              v2.0 Pro
             </span>
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-400">

@@ -527,6 +527,99 @@ app.post('/api/proxy/request', requireAuth, limitProxy, async (req, res) => {
   }
 });
 
+// 10. Backup Export / Import (user-data tables; webhooks & pomodoro logs excluded)
+app.get('/api/backup/export', requireAuth, (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: {
+        app: 'aetherdesk',
+        version: '2.0.0',
+        exported_at: new Date().toISOString(),
+        tasks: db.prepare('SELECT * FROM tasks ORDER BY id ASC').all(),
+        snippets: db.prepare('SELECT * FROM snippets ORDER BY id ASC').all(),
+        scripts: db.prepare('SELECT * FROM scripts ORDER BY id ASC').all(),
+        notes: db.prepare('SELECT * FROM notes ORDER BY id ASC').all(),
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/backup/import', requireAuth, (req, res) => {
+  const { tasks = [], snippets = [], scripts = [], notes = [] } = req.body || {};
+  for (const [key, val] of Object.entries({ tasks, snippets, scripts, notes })) {
+    if (!Array.isArray(val)) {
+      return res.status(400).json({ success: false, error: `Field '${key}' must be an array` });
+    }
+  }
+  const nonEmpty = (v) => typeof v === 'string' && v.trim().length > 0;
+
+  try {
+    // node:sqlite has no db.transaction() helper — manage savepoints manually
+    db.exec('BEGIN');
+    let result;
+    try {
+      const counts = { tasks: 0, snippets: 0, scripts: 0, notes: 0, skipped: 0 };
+
+      db.prepare('DELETE FROM tasks').run();
+      const insTask = db.prepare(`INSERT INTO tasks (title, description, status, priority, category, due_date) VALUES (?, ?, ?, ?, ?, ?)`);
+      for (const r of tasks) {
+        if (!r || !nonEmpty(r.title)) { counts.skipped++; continue; }
+        insTask.run(
+          r.title.trim(),
+          typeof r.description === 'string' ? r.description : '',
+          ['todo', 'in_progress', 'review', 'done'].includes(r.status) ? r.status : 'todo',
+          ['low', 'medium', 'high', 'urgent'].includes(r.priority) ? r.priority : 'medium',
+          typeof r.category === 'string' && r.category ? r.category : 'Dev',
+          typeof r.due_date === 'string' ? r.due_date : null,
+        );
+        counts.tasks++;
+      }
+
+      db.prepare('DELETE FROM snippets').run();
+      const insSnip = db.prepare(`INSERT INTO snippets (title, language, code, tags, description, is_favorite) VALUES (?, ?, ?, ?, ?, ?)`);
+      for (const r of snippets) {
+        if (!r || !nonEmpty(r.title) || typeof r.code !== 'string') { counts.skipped++; continue; }
+        insSnip.run(r.title.trim(), typeof r.language === 'string' ? r.language : 'text', r.code,
+          typeof r.tags === 'string' ? r.tags : '', typeof r.description === 'string' ? r.description : '',
+          r.is_favorite ? 1 : 0);
+        counts.snippets++;
+      }
+
+      db.prepare('DELETE FROM scripts').run();
+      const insScript = db.prepare(`INSERT INTO scripts (name, command, category, description) VALUES (?, ?, ?, ?)`);
+      for (const r of scripts) {
+        if (!r || !nonEmpty(r.name) || !nonEmpty(r.command)) { counts.skipped++; continue; }
+        insScript.run(r.name.trim(), r.command.trim(),
+          typeof r.category === 'string' && r.category ? r.category : 'Custom',
+          typeof r.description === 'string' ? r.description : '');
+        counts.scripts++;
+      }
+
+      db.prepare('DELETE FROM notes').run();
+      const insNote = db.prepare(`INSERT INTO notes (title, content, pinned) VALUES (?, ?, ?)`);
+      for (const r of notes) {
+        if (!r || !nonEmpty(r.title)) { counts.skipped++; continue; }
+        insNote.run(r.title.trim(), typeof r.content === 'string' ? r.content : '', r.pinned ? 1 : 0);
+        counts.notes++;
+      }
+
+      result = counts;
+      db.exec('COMMIT');
+    } catch (inner) {
+      try { db.exec('ROLLBACK'); } catch (_) {}
+      throw inner;
+    }
+
+    broadcast('backup_restored', result);
+    res.json({ success: true, data: result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Serve client production build if exists
 const CLIENT_DIST = path.join(__dirname, '..', 'client', 'dist');
 if (fs.existsSync(CLIENT_DIST)) {
