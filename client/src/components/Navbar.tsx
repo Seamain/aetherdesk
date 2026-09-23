@@ -140,15 +140,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           </select>
         </div>
         {/* API Token (Bearer auth when server sets AETHER_TOKEN) */}
-        <div className="hidden lg:flex items-center bg-slate-900 border border-slate-800 rounded-lg p-1 text-xs" title="API Token: required only if server sets AETHER_TOKEN">
-          {authed ? <Lock className="w-3.5 h-3.5 text-emerald-400 ml-1.5 mr-1" /> : <LockOpen className="w-3.5 h-3.5 text-slate-500 ml-1.5 mr-1" />}
+        <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-1 text-xs max-w-[9.5rem] sm:max-w-none" title={t('settings.token_hint')}>
+          {authed ? <Lock className="w-3.5 h-3.5 text-emerald-400 ml-1.5 mr-1 shrink-0" /> : <LockOpen className="w-3.5 h-3.5 text-slate-500 ml-1.5 mr-1 shrink-0" />}
           <input
             type="password"
             value={token}
             onChange={(e) => { setToken(e.target.value); setAuthToken(e.target.value.trim()); }}
-            placeholder="API Token"
+            placeholder={t('settings.token_ph')}
             autoComplete="off"
-            className="bg-transparent text-slate-300 text-xs focus:outline-none w-24 placeholder:text-slate-600"
+            className="bg-transparent text-slate-300 text-xs focus:outline-none w-16 sm:w-24 placeholder:text-slate-600 min-w-0"
           />
         </div>
         <button

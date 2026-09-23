@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Settings, Shield, Server, Clock, Container } from 'lucide-react';
+import { Settings, Shield, Server, Clock, Container, Lock, LockOpen } from 'lucide-react';
 import { useLang } from '../i18n';
-import { api } from '../services/api';
+import { api, getAuthToken, setAuthToken } from '../services/api';
 
 type MetaInfo = {
   version: string;
@@ -16,6 +16,8 @@ export const SettingsView: React.FC = () => {
   const { t } = useLang();
   const [meta, setMeta] = useState<MetaInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(() => getAuthToken());
+  const authed = token.trim().length > 0;
 
   useEffect(() => {
     let cancelled = false;
@@ -30,6 +32,11 @@ export const SettingsView: React.FC = () => {
       });
     return () => { cancelled = true; };
   }, []);
+
+  const onTokenChange = (v: string) => {
+    setToken(v);
+    setAuthToken(v.trim());
+  };
 
   const version = (meta?.version || '').slice(0);
   const node = (meta?.node || '').slice(0);
@@ -92,10 +99,24 @@ export const SettingsView: React.FC = () => {
       </div>
 
       <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t('settings.howto_title')}</h4>
+        <div className="flex items-center gap-2">
+          {authed ? <Lock className="w-4 h-4 text-emerald-400" /> : <LockOpen className="w-4 h-4 text-slate-500" />}
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t('settings.token_title')}</h4>
+        </div>
+        <p className="text-xs text-slate-400 leading-relaxed">{t('settings.token_hint')}</p>
+        <label className="block space-y-1.5">
+          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">{t('settings.token_label')}</span>
+          <input
+            type="password"
+            value={token}
+            onChange={(e) => onTokenChange(e.target.value)}
+            placeholder={t('settings.token_ph')}
+            autoComplete="off"
+            className="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-sm font-mono text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50"
+          />
+        </label>
+        <p className="text-[11px] text-slate-500">{authed ? t('settings.token_set') : t('settings.token_empty')}</p>
         <ul className="space-y-2 text-xs text-slate-300 leading-relaxed list-disc pl-4">
-          <li>{t('settings.token_hint')}</li>
-          <li className="lg:hidden">{t('settings.token_mobile_hint')}</li>
           <li>{t('settings.env_token_hint')}</li>
           <li>{t('settings.retention_readonly')}</li>
         </ul>

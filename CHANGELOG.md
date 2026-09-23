@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.0 — Docker CI + mobile Bearer
+- CI: `docker build -t aetherdesk:ci .` job (no push); failure fails the workflow
+- Frontend: mobile Bearer/token UX (Frontend)
+- Version bump to 2.6.0
+
 ## 2.5.0 — Docker/security polish
 - Rate limits: backup export/import 5/min, webhook DELETE (clear/by-id) 10/min (still requireAuth)
 - Docker non-root `USER node`; compose `cap_drop`/`no-new-privileges`/`read_only` + localhost bind; docs urge `AETHER_TOKEN`
