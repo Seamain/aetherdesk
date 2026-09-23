@@ -151,6 +151,14 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  // Runtime meta (public)
+  getMeta: () => request<{
+    version: string;
+    authRequired: boolean;
+    webhookKeep: number;
+    webhookTtlDays: number;
+  }>('/meta'),
+
   // Backup export / import
   exportBackup: () => request<{
     app: string;
