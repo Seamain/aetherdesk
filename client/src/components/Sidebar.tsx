@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Activity,
   Kanban,
@@ -34,6 +34,13 @@ interface SidebarProps {
   taskCount: number;
 }
 
+type MetaInfo = {
+  version: string;
+  authRequired: boolean;
+  webhookKeep: number;
+  webhookTtlDays: number;
+};
+
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onSelectTab,
@@ -42,6 +49,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { t } = useLang();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [meta, setMeta] = useState<MetaInfo | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    api.getMeta()
+      .then((data) => {
+        if (!cancelled && data) setMeta(data);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const handleExport = async () => {
     try {
@@ -145,6 +163,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
   ];
 
+  const versionText = (meta?.version || '').slice(0);
+  const authLabel = meta
+    ? (meta.authRequired ? t('meta.auth_on') : t('meta.auth_off'))
+    : '';
+  const retentionLabel = meta
+    ? t('meta.retention')
+        .replace('{keep}', String(meta.webhookKeep ?? ''))
+        .replace('{days}', String(meta.webhookTtlDays ?? ''))
+    : '';
+
   return (
     <aside className="w-60 shrink-0 border-r border-slate-800/80 bg-slate-950/50 p-3 flex flex-col justify-between hidden md:flex min-h-[calc(100vh-4rem)]">
       <div className="space-y-1">
@@ -188,7 +216,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Footer Info */}
-      <div className="p-3 bg-slate-900/40 border border-slate-800/60 rounded-xl space-y-2">
+      <div className="glass-panel p-3 rounded-xl space-y-2">
         <div>
           <div className="text-xs text-slate-400 font-medium">{t('side.footer')}</div>
           <div className="text-[11px] text-slate-500 mt-0.5">
@@ -198,6 +226,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
             {t('side.telemetry_on')}
           </div>
+          {meta && (
+            <div className="mt-2 text-[10px] text-slate-400 font-mono leading-relaxed break-all">
+              {`v${versionText || '—'}`}
+              {' \u00b7 '}
+              {(authLabel || '').slice(0)}
+              {' \u00b7 '}
+              {(retentionLabel || '').slice(0)}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2 pt-2 border-t border-slate-800/60">
           <button
