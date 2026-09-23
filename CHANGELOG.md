@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.5.0 — Docker/security polish
+- Rate limits: backup export/import 5/min, webhook DELETE (clear/by-id) 10/min (still requireAuth)
+- Docker non-root `USER node`; compose `cap_drop`/`no-new-privileges`/`read_only` + localhost bind; docs urge `AETHER_TOKEN`
+- Version bump to 2.5.0
+
 ## 2.4.0 — Settings/meta UX
 - `GET /api/meta` adds read-only `node` / `platform` (still public, no auth)
 - Settings/meta UX on the client (Frontend)

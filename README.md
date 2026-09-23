@@ -146,13 +146,19 @@ When `AETHER_TOKEN` is set, dangerous endpoints (kill-process, runner, proxy, sc
 AETHER_TOKEN="change-me" ./daemon.sh restart
 ```
 
-Built-in guardrails always apply: process list capped at 50, runner code ≤ 50 KB with 1–30 s timeout, proxy body ≤ 200 KB with 10 s timeout, and per-minute rate limits (runner 10, proxy 30, webhook-catch 120, kill 10).
+Built-in guardrails always apply: process list capped at 50, runner code ≤ 50 KB with 1–30 s timeout, proxy body ≤ 200 KB with 10 s timeout, and per-minute rate limits (runner 10, proxy 30, webhook-catch 120, kill 10, backup 5, webhook mutate 10).
 
 ### Docker
 ```bash
 docker compose up -d --build
-curl http://localhost:3001/healthz
+curl http://127.0.0.1:3001/healthz
 ```
+
+**Docker security defaults (v2.5+):**
+- Runs as non-root (`USER node`) with `/app/data` writable via volume
+- Compose binds `127.0.0.1:3001` only (not all interfaces)
+- `cap_drop: [ALL]`, `security_opt: no-new-privileges`, `read_only` rootfs + `/tmp` tmpfs
+- Set `AETHER_TOKEN` in compose/env for production — Bearer auth on kill/runner/proxy/scripts/backup/webhook mutate
 
 ### Tests
 ```bash
@@ -194,7 +200,7 @@ Sidebar footer → Export downloads versioned JSON (tasks/snippets/scripts/notes
 | `POST` | `/api/backup/import` | Transactional restore 🔒 |
 | `POST` | `/api/proxy/request` | Proxied HTTP debug request 🔒 |
 
-🔒 = requires `Bearer` token when `AETHER_TOKEN` is set; always rate-limited.
+🔒 = requires `Bearer` token when `AETHER_TOKEN` is set; rate-limited (backup 5/min, webhook mutate 10/min, plus runner/proxy/kill/catch).
 
 ---
 

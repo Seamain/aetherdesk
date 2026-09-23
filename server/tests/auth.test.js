@@ -83,6 +83,8 @@ describe('AetherDesk auth mode (AETHER_TOKEN set)', () => {
       { method: 'POST', path: '/api/scripts', body: { name: 'x', command: 'echo 1' } },
       { method: 'DELETE', path: '/api/webhooks' },
       { method: 'GET', path: '/api/backup/export' },
+      { method: 'POST', path: '/api/backup/import', body: { tasks: [] } },
+      { method: 'DELETE', path: '/api/webhooks/1' },
     ];
     for (const c of checks) {
       const res = await fetch(`${BASE}${c.path}`, {

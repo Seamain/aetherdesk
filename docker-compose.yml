@@ -4,16 +4,24 @@ services:
     image: aetherdesk:latest
     container_name: aetherdesk
     ports:
+      # Bind localhost only — do not expose 0.0.0.0 unless behind a reverse proxy + token
       - "127.0.0.1:3001:3001"
     environment:
       PORT: 3001
-      # Uncomment to require Bearer token on dangerous APIs:
+      # Production: uncomment to require Bearer token on dangerous APIs
       # AETHER_TOKEN: "change-me"
       # Webhook retention tuning (defaults: 200 events / 7 days):
       # WEBHOOK_KEEP: "200"
       # WEBHOOK_TTL_DAYS: "7"
     volumes:
       - ./data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3001/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]

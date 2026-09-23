@@ -1,6 +1,6 @@
 {
   "name": "aetherdesk",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Next-Gen Linux Developer Cockpit & System Telemetry HUD",
   "main": "server/index.js",
   "type": "module",

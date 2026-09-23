@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Settings, Shield, Server, Clock } from 'lucide-react';
+import { Settings, Shield, Server, Clock, Container } from 'lucide-react';
 import { useLang } from '../i18n';
 import { api } from '../services/api';
 
@@ -95,9 +95,24 @@ export const SettingsView: React.FC = () => {
         <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t('settings.howto_title')}</h4>
         <ul className="space-y-2 text-xs text-slate-300 leading-relaxed list-disc pl-4">
           <li>{t('settings.token_hint')}</li>
+          <li className="lg:hidden">{t('settings.token_mobile_hint')}</li>
           <li>{t('settings.env_token_hint')}</li>
           <li>{t('settings.retention_readonly')}</li>
         </ul>
+      </div>
+
+      <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
+        <div className="flex items-center gap-2">
+          <Container className="w-4 h-4 text-slate-400" />
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t('settings.security_title')}</h4>
+        </div>
+        <ul className="space-y-2 text-xs text-slate-300 leading-relaxed list-disc pl-4">
+          <li>{t('settings.security_token')}</li>
+          <li>{t('settings.docker_bind')}</li>
+          <li>{t('settings.docker_harden')}</li>
+          <li>{t('settings.security_retention')}</li>
+        </ul>
+        <p className="text-[11px] text-slate-500 leading-relaxed">{t('settings.security_disclaimer')}</p>
       </div>
     </div>
   );

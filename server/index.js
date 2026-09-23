@@ -61,6 +61,8 @@ const limitRunner = rateLimit({ windowMs: 60_000, max: 10, keyPrefix: 'runner' }
 const limitProxy = rateLimit({ windowMs: 60_000, max: 30, keyPrefix: 'proxy' });
 const limitWebhookCatch = rateLimit({ windowMs: 60_000, max: 120, keyPrefix: 'whcatch' });
 const limitKill = rateLimit({ windowMs: 60_000, max: 10, keyPrefix: 'kill' });
+const limitBackup = rateLimit({ windowMs: 60_000, max: 5, keyPrefix: 'backup' });
+const limitWebhookMutate = rateLimit({ windowMs: 60_000, max: 10, keyPrefix: 'whmutate' });
 
 // Webhook retention: keep last N rows + drop older than M days (env-tunable)
 const WEBHOOK_KEEP = Math.max(parseInt(process.env.WEBHOOK_KEEP || '200', 10) || 200, 1);
@@ -364,12 +366,12 @@ app.get('/api/webhooks', (req, res) => {
   res.json({ success: true, data: rows });
 });
 
-app.delete('/api/webhooks', requireAuth, (req, res) => {
+app.delete('/api/webhooks', requireAuth, limitWebhookMutate, (req, res) => {
   db.prepare('DELETE FROM webhooks').run();
   res.json({ success: true, message: 'Cleared all webhooks' });
 });
 
-app.delete('/api/webhooks/:id', requireAuth, (req, res) => {
+app.delete('/api/webhooks/:id', requireAuth, limitWebhookMutate, (req, res) => {
   const info = db.prepare('DELETE FROM webhooks WHERE id = ?').run(req.params.id);
   if (info.changes === 0) return res.status(404).json({ success: false, error: 'Webhook not found' });
   res.json({ success: true });
@@ -550,7 +552,7 @@ app.post('/api/proxy/request', requireAuth, limitProxy, async (req, res) => {
 });
 
 // 10. Backup Export / Import (user-data tables; webhooks excluded)
-app.get('/api/backup/export', requireAuth, (req, res) => {
+app.get('/api/backup/export', requireAuth, limitBackup, (req, res) => {
   try {
     res.json({
       success: true,
@@ -570,7 +572,7 @@ app.get('/api/backup/export', requireAuth, (req, res) => {
   }
 });
 
-app.post('/api/backup/import', requireAuth, (req, res) => {
+app.post('/api/backup/import', requireAuth, limitBackup, (req, res) => {
   const { tasks = [], snippets = [], scripts = [], notes = [], pomodoro_logs = [] } = req.body || {};
   for (const [key, val] of Object.entries({ tasks, snippets, scripts, notes, pomodoro_logs })) {
     if (!Array.isArray(val)) {
