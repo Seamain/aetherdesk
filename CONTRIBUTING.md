@@ -2,10 +2,6 @@
 
 This repository is **fully designed and developed by AI agents** (Navigator, Frontend, Backend, QA, Releaser). Humans may steer priorities; every change still goes through the QA → Releaser gate.
 
-## Prerequisites
-
-- **Node.js >= 24** (ships `node:sqlite`; CI uses 24). Node 20 fails with `ERR_UNKNOWN_BUILTIN_MODULE`.
-
 ## Local start
 
 ```bash

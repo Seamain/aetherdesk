@@ -98,7 +98,7 @@ As a developer on Linux and modern tiling desktops (e.g. **Omarchy / Hyprland**)
                         │  (/proc & Linux) │ (Bash / Py / JS) │
                         ├──────────────────┴──────────────────┤
                         │          SQLite Engine              │
-                        │        (node:sqlite WAL Concurrent DB)    │
+                        │  (node:sqlite WAL Concurrent DB)    │
                         └─────────────────────────────────────┘
 ```
 
