@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.0 — Auth smoke + runtime meta + repo polish
+- `GET /api/meta` (version, authRequired, webhook retention); Sidebar footer meta + i18n
+- Auth regression suite (open-mode + token mode 401/200)
+- CONTRIBUTING, PR/Issue templates; README CI badge + AI authorship note; author → Seamain
+
 ## 2.0.0 — Backup & Restore release
 - Backup export/import (`GET/POST /api/backup/*`, Sidebar one-click download/restore, transactional replace of tasks/snippets/scripts/notes)
 - Version bumped to 2.0.0 across root, client, HUD badge, and backup payloads
